@@ -25,10 +25,10 @@ variable "security_groups" {
 
 variable "domain" {
   type = string
-  default = "nginxasb.com"
+  default = "kenjiasb.com"
 }
 
 variable "nginx_server_url" {
   type = string
-  default = "nginx.nginxasb.com"
+  default = "nginx.kenjiasb.com"
 }

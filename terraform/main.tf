@@ -16,8 +16,8 @@ resource "aws_security_group" "nginx_sg" {
   }
 
   ingress {
-    from_port   = 443
-    to_port     = 443
+    from_port   = 80
+    to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -38,33 +38,33 @@ resource "aws_instance" "nginx_server" {
 
 
   provisioner "file" {
-    source      = "./nginx-ec2-terraform/nginx/nginx.conf"
-    destination = "/tmp/"
+    source      = "~/nginx-ec2-terraform/nginx/nginx.conf"
+    destination = "/tmp/nginx.conf"
     connection {
       type = "ssh"
-      host = self.private_ip
+      host = self.public_ip
       user        = "ubuntu"
-      private_key = file("/home/kenji/.ssh/id_rsa")
+      private_key = file("~/.ssh/id_rsa")
     }
   }
   provisioner "file" {
-    source      = "./nginx-ec2-terraform/nginx/site-available"
+    source      = "~/nginx-ec2-terraform/nginx/sites-available"
     destination = "/tmp/"
     connection {
       type = "ssh"
-      host = self.private_ip
+      host = self.public_ip
       user        = "ubuntu"
-      private_key = file("/home/kenji/.ssh/id_rsa")
+      private_key = file("~/.ssh/id_rsa")
     }
   }
   provisioner "file" {
-    source      = "./nginx-ec2-terraform/project_folder"
+    source      = "~/nginx-ec2-terraform/project_folder"
     destination = "/tmp/project_folder"
     connection {
       type = "ssh"
-      host = self.private_ip
+      host = self.public_ip
       user        = "ubuntu"
-      private_key = file("/home/kenji/.ssh/id_rsa")
+      private_key = file("~/.ssh/id_rsa")
     }
   }
   provisioner "remote-exec" {
@@ -72,15 +72,16 @@ resource "aws_instance" "nginx_server" {
       "sudo apt-get update",
       "sudo apt-get install -y nginx",
       "sudo cp /tmp/nginx.conf /etc/nginx/nginx.conf",
-      "sudo cp /tmp/sites-available/python-service /etc/nginx/sites-available/python-service",
-      "sudo cp /tmp/sites-available/node-service /etc/nginx/sites-available/node-service",
-      "sudo ln -s /etc/nginx/sites-available/python-service /etc/nginx/sites-enabled/",
-      "sudo ln -s /etc/nginx/sites-available/node-service /etc/nginx/sites-enabled/",
-      "sudo systemctl restart nginx"
+      "sudo cp /tmp/sites-available/reverse_proxy /etc/nginx/sites-available/reverse_proxy",
+      "sudo ln -s /etc/nginx/sites-available/reverse_proxy /etc/nginx/sites-enabled/",
+      "sudo systemctl restart nginx",
+      "sudo apt install -y docker.io && sudo apt -y install docker-compose && sudo usermod -aG docker ubuntu && newgrp docker",
+      "mv /tmp/project_folder /home/ubuntu/",
+      "cd /home/ubuntu/project_folder && docker-compose up -d"
     ]
     connection {
       type        = "ssh"
-      host        = self.private_ip
+      host        = self.public_ip
       user        = "ubuntu"
       private_key = file("/home/kenji/.ssh/id_rsa")
     }
