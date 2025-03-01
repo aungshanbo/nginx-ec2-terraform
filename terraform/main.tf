@@ -59,7 +59,7 @@ resource "aws_instance" "nginx_server" {
   }
   provisioner "file" {
     source      = "~/nginx-ec2-terraform/project_folder"
-    destination = "/tmp/project_folder"
+    destination = "/home/ubuntu/project_folder"
     connection {
       type = "ssh"
       host = self.public_ip
@@ -75,9 +75,8 @@ resource "aws_instance" "nginx_server" {
       "sudo cp /tmp/sites-available/reverse_proxy /etc/nginx/sites-available/reverse_proxy",
       "sudo ln -s /etc/nginx/sites-available/reverse_proxy /etc/nginx/sites-enabled/",
       "sudo systemctl restart nginx",
-      "sudo apt install -y docker.io && sudo apt -y install docker-compose && sudo usermod -aG docker ubuntu && newgrp docker",
-      "mv /tmp/project_folder /home/ubuntu/",
-      "cd /home/ubuntu/project_folder && docker-compose up -d"
+      "sudo apt install -y docker.io && sudo apt -y install docker-compose && sudo usermod -aG docker ubuntu",
+      "sudo su - ubuntu -c 'cd /home/ubuntu/project_folder && docker-compose up -d'"
     ]
     connection {
       type        = "ssh"
