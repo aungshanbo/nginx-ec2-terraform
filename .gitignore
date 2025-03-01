@@ -14,3 +14,6 @@
 .terraformrc
 terraform.rc
 .terraform*
+*.tfvars
+terraform.tfstate
+terraform.tfstate.backup
